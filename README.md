@@ -12,7 +12,7 @@ isTouched() then returns true as soon as the time to charge exceeds (untouchedTi
 The default value for MAX_FACTOR can be adjusted in the #define below based on trial and error against your
 capacitive touch pin connected hardware.
 
-It can also me adjusted in the third version of the constructor with a second maxFactor parameter.
+It can also be adjusted in the third version of the constructor with a second maxFactor parameter.
 Appropriately small _maxFactors lead to faster isTouched() return times.
 Too small _maxFactor will lead to false positives for isTouched().
  
