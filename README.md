@@ -22,6 +22,13 @@ touchablePin(uint8_t, float, int); // same as the above, and also changes the _n
 // attribute from the default of 4
 // smaller is faster, larger senses more touches.
 
+<<<<<<< HEAD
+=======
+It can also be adjusted in the third version of the constructor with a second maxFactor parameter.
+Appropriately small _maxFactors lead to faster isTouched() return times.
+Too small _maxFactor will lead to false positives for isTouched().
+ 
+>>>>>>> c8f7fa25d9729ce0de829073be7693cebd4bab9c
 To be useful, the pin must be untouched on start-up (or rather, when initUntouched() is called).
 
 Use the touchablePin.touchRead() method to experiment with your setup.
