@@ -61,7 +61,7 @@ private:
     void init(void);
     int touchReadWithMax(uint8_t, bool);
     
-    int _numSamples = 4; // give the touch routine this many time to sense touched.
+    int _numSamples = 3; // give the touch routine this many time to sense touched.
     int targetTime;
     float _maxFactor = MAX_FACTOR;
 };
