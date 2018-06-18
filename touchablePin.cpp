@@ -122,30 +122,22 @@ int touchablePin::touchReadWithMax(uint8_t pin, bool useMax)
     TSI0_GENCS = TSI_GENCS_NSCN(NSCAN) | TSI_GENCS_PS(PRESCALE) | TSI_GENCS_TSIEN | TSI_GENCS_SWTS;
     delayMicroseconds(10);
     while ((TSI0_GENCS & TSI_GENCS_SCNIP) && (timeNow < targetTime)) {   //   wait
-        if (useMax) {
-            timeNow = micros();
-        }
-    }
-    if (useMax && (timeNow >= targetTime)) {
-        return (-1);
+        if (useMax)  timeNow = micros();
     }
     delayMicroseconds(1);
-    return *((volatile uint16_t *)(&TSI0_CNTR1) + ch);
+    if (useMax && (timeNow >= targetTime))   return (-1);
+    else                                     return *((volatile uint16_t *)(&TSI0_CNTR1) + ch);
 #elif defined(HAS_KINETIS_TSI_LITE)
     TSI0_GENCS = TSI_GENCS_REFCHRG(4) | TSI_GENCS_EXTCHRG(3) | TSI_GENCS_PS(PRESCALE)
     | TSI_GENCS_NSCN(NSCAN) | TSI_GENCS_TSIEN | TSI_GENCS_EOSF;
     TSI0_DATA = TSI_DATA_TSICH(ch) | TSI_DATA_SWTS;
     delayMicroseconds(10);
     while ((TSI0_GENCS & TSI_GENCS_SCNIP) && (timeNow < targetTime)) {   //   wait
-        if (useMax) {
-            timeNow = micros();
-        }
-    }
-    if (useMax && (timeNow >= targetTime)) {
-        return (-1);
+        if (useMax) timeNow = micros();
     }
     delayMicroseconds(1);
-    return TSI0_DATA & 0xFFFF;
+    if (useMax && (timeNow >= targetTime))  return (-1);
+    else                                    return TSI0_DATA & 0xFFFF;
 #endif
 }
 
