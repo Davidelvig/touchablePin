@@ -11,24 +11,15 @@ isTouched() then returns true as soon as the time to charge exceeds (untouchedTi
 
 The default value for MAX_FACTOR is 1.3, and can be adjusted in the #define below based on trial and error against your capacitive touch pin connected hardware.
 
-touchablePin(void);  // be sure to call setPin() before calling isTouched()
+touchablePin(void);  // If you use this, be sure to call setPin() before calling isTouched()
 touchablePin(uint8_t); // sets a pin number on instantiation
 touchablePin(uint8_t, float);  // sets a pin number and an alternative MAX_FACTOR
-//It can also me adjusted in the third version of the constructor
-//with a second maxFactor parameter.
 //Appropriately small _maxFactors lead to faster isTouched() return times.
 //Too small _maxFactor will lead to false positives for isTouched().
 touchablePin(uint8_t, float, int); // same as the above, and also changes the _numSamples
 // attribute from the default of 4
-// smaller is faster, larger senses more touches.
+// smaller is faster, larger senses more touches, perhaps more reliably.
 
-<<<<<<< HEAD
-=======
-It can also be adjusted in the third version of the constructor with a second maxFactor parameter.
-Appropriately small _maxFactors lead to faster isTouched() return times.
-Too small _maxFactor will lead to false positives for isTouched().
- 
->>>>>>> c8f7fa25d9729ce0de829073be7693cebd4bab9c
 To be useful, the pin must be untouched on start-up (or rather, when initUntouched() is called).
 
 Use the touchablePin.touchRead() method to experiment with your setup.
