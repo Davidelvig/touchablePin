@@ -53,17 +53,21 @@ public:
     bool    isTouched(void);
     int     touchRead(void);
     void    setPin(uint8_t pin);
-    
     int     pinNumber       = -1;
-    int     untouchedValue  = -1;
-    int     untouchedTime   = -1;
     
+    float           untouchedValue;
+    float           lastTouchedValue;
+    
+    unsigned long   untouchedDuration;
+    unsigned long   targetTime;
+    unsigned long   startTouchTime;
+    unsigned long   endTouchTime;
+
 private:
     void    init(void);
     int     touchReadWithMax(uint8_t, bool);
     
     int     _numSamples = NUM_SAMPLES; // give the touch routine this many time to sense touched.
-    int     targetTime;
     float   _maxFactor = MAX_FACTOR;
 };
 

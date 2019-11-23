@@ -104,9 +104,18 @@ touchablePin::touchablePin(uint8_t pin, float maxFactor, int numSamples) {
 
 int touchablePin::touchReadWithMax(uint8_t pin, bool useMax)
 {
-    unsigned long timeNow = micros(),
-                  targetTime = timeNow + (untouchedTime * _maxFactor);
+    startTouchTime = micros();
+    targetTime = startTouchTime + (unsigned long)(untouchedDuration * _maxFactor); // casting is vital here or math is incorrect half-way through long cycle (just after 2,146,199,559).  I think the (float)maxFactor causes a signed result in targetTime somehow
     
+    if (targetTime < startTouchTime) {
+        delayMicroseconds((unsigned long)(untouchedDuration * _maxFactor));
+        Serial.printf("Re-doing targetTime in touchablePin::touchReadWithMax\nstartTouchTime = %lu\ttargettime = %lu\n", startTouchTime, targetTime);
+        startTouchTime = micros();
+        targetTime = startTouchTime + (unsigned long)(untouchedDuration * _maxFactor);
+    }
+        
+    unsigned long thisMoment = startTouchTime;
+    int ret = 0;
     uint32_t ch;
     
     if (pin >= NUM_DIGITAL_PINS) return 0;
@@ -121,31 +130,36 @@ int touchablePin::touchReadWithMax(uint8_t pin, bool useMax)
     TSI0_SCANC = TSI_SCANC_REFCHRG(3) | TSI_SCANC_EXTCHRG(CURRENT);
     TSI0_GENCS = TSI_GENCS_NSCN(NSCAN) | TSI_GENCS_PS(PRESCALE) | TSI_GENCS_TSIEN | TSI_GENCS_SWTS;
     delayMicroseconds(10);
-    while ((TSI0_GENCS & TSI_GENCS_SCNIP) && (timeNow < targetTime)) {   //   wait
-        if (useMax)  timeNow = micros();
+    while ((TSI0_GENCS & TSI_GENCS_SCNIP) && (thisMoment < targetTime)) {   //   wait
+        if (useMax)  thisMoment = micros();
     }
     delayMicroseconds(1);
-    if (useMax && (timeNow >= targetTime))   return (-1);
-    else                                     return *((volatile uint16_t *)(&TSI0_CNTR1) + ch);
+    if (useMax && (thisMoment >= targetTime))   ret = -1;
+    else                                        ret = *((volatile uint16_t *)(&TSI0_CNTR1) + ch);
+    lastTouchedValue = *((volatile uint16_t *)(&TSI0_CNTR1) + ch);
 #elif defined(HAS_KINETIS_TSI_LITE)
     TSI0_GENCS = TSI_GENCS_REFCHRG(4) | TSI_GENCS_EXTCHRG(3) | TSI_GENCS_PS(PRESCALE)
     | TSI_GENCS_NSCN(NSCAN) | TSI_GENCS_TSIEN | TSI_GENCS_EOSF;
     TSI0_DATA = TSI_DATA_TSICH(ch) | TSI_DATA_SWTS;
     delayMicroseconds(10);
-    while ((TSI0_GENCS & TSI_GENCS_SCNIP) && (timeNow < targetTime)) {   //   wait
-        if (useMax) timeNow = micros();
+    while ((TSI0_GENCS & TSI_GENCS_SCNIP) && (thisMoment < targetTime)) {   //   wait
+        if (useMax) thisMoment = micros();
     }
     delayMicroseconds(1);
-    if (useMax && (timeNow >= targetTime))  return (-1);
-    else                                    return TSI0_DATA & 0xFFFF;
+    if (useMax && (thisMoment >= targetTime))   ret = -1;
+    else                                        ret = TSI0_DATA & 0xFFFF;
+    lastTouchedValue = TSI0_DATA & 0xFFFF;
 #endif
+    endTouchTime = micros();
+    return(ret);
 }
 
 void touchablePin::init(void) {
     unsigned long timeBefore = micros();
-    untouchedValue = touchReadWithMax(pinNumber, false);
+    untouchedValue = touchReadWithMax(pinNumber, false) - 10; // the -10 accounts for occasional drift downward in the baseline untouched value - by one or two.
     unsigned long timeAfter = micros();
-    untouchedTime = timeAfter - timeBefore;
+    untouchedDuration = timeAfter - timeBefore;
+    
 }
 
 void touchablePin::initUntouched(void) {
