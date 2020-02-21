@@ -33,7 +33,7 @@
  The work-around is to call init() twice.  The To Do item is to figure out why (is there some pre-existing
  charge on the pin?), and eliminate the extra call or document the reasoning.
 *********************************************************************************************************************/
-#define MAX_FACTOR 1.5
+#define DEFAULT_MAX_FACTOR 1.5f
 #define NUM_SAMPLES 2
 
 #ifndef touchablePin_h
@@ -53,6 +53,7 @@ public:
     bool    isTouched(void);
     int     touchRead(void);
     void    setPin(uint8_t pin);
+    void    setMaxFactor(float factor) {_maxFactor = factor;};
     int     pinNumber       = -1;
     
     float           untouchedValue;
@@ -68,7 +69,7 @@ private:
     int     touchReadWithMax(uint8_t, bool);
     
     int     _numSamples = NUM_SAMPLES; // give the touch routine this many time to sense touched.
-    float   _maxFactor = MAX_FACTOR;
+    float   _maxFactor = DEFAULT_MAX_FACTOR;
 };
 
 #endif /* touchablePin_h */

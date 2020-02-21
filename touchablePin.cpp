@@ -109,7 +109,7 @@ int touchablePin::touchReadWithMax(uint8_t pin, bool useMax)
     
     if (targetTime < startTouchTime) {
         delayMicroseconds((unsigned long)(untouchedDuration * _maxFactor));
-        Serial.printf("Re-doing targetTime in touchablePin::touchReadWithMax\nstartTouchTime = %lu\ttargettime = %lu\n", startTouchTime, targetTime);
+//        Serial.printf("Re-doing targetTime in touchablePin::touchReadWithMax\nstartTouchTime = %lu\ttargettime = %lu\n", startTouchTime, targetTime);
         startTouchTime = micros();
         targetTime = startTouchTime + (unsigned long)(untouchedDuration * _maxFactor);
     }
