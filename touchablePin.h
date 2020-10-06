@@ -7,37 +7,31 @@
 //
 /********************************************************************************************************************
  Capacitive Touch pins are charged to get their full capacitance, and the time-to-charge is proportional the capacitance.
- touchablePin works by assigning an untouched timing value with a call to initUntouched()
- isTouched() then returns true as soon as the time to charge exceeds (untouchedTime * _maxfactor)
+ touchablePin works by assigning an untouched timing value with a call to init()
+ isTouched() then returns true as soon as the time to charge exceeds (untouchedDuration * _touchedFactor)
  ... not waiting for the pin to get fully charged.
  
- The default value for MAX_FACTOR is 1.3, and can be adjusted in the #define below based on trial and error against your capacitive touch pin connected hardware.
+ The default value for DEFAULT_TOUCHED_FACTOR is 1.3, and can be adjusted in the #define below based on trial and error against your capacitive touch pin connected hardware.
  
- touchablePin(void);  // be sure to call setPin() before calling isTouched()
- touchablePin(uint8_t); // sets a pin number on instantiation
- touchablePin(uint8_t, float);  // sets a pin number and an alternative MAX_FACTOR
-                                // It can also me adjusted in the third version of the constructor
-                                // with a second maxFactor parameter.
-                                // Appropriately small _maxFactors lead to faster isTouched() return times.
-                                // Too small _maxFactor will lead to false positives for isTouched().
- touchablePin(uint8_t, float, int); // same as the above, and also changes the _numSamples
-                                    // attribute from the default of 4
-                                    // smaller is faster, larger senses more touches.
+ touchablePin(void);                    // be sure to call setPin() before calling isTouched()
+ touchablePin(uint8_t);                // sets a pin number on instantiation
+ touchablePin(uint8_t, float);       // sets a pin number and an alternative DEFAULT_TOUCHED_FACTOR
+                        // Appropriately small _maxFactors lead to faster isTouched() return times.
+                        // Too small _maxFactor will lead to false positives for isTouched().
  
  To be useful, the pin must be untouched on start-up (or rather, when initUntouched() is called).
  
- Use the touchablePin.touchRead() method to experiment with your setup.
- It will return the same value as the unmodified touchPin() to check the ratio of your untouched and touched states.
+ Use the touchablePin.printPin() method to experiment with your setup.
+ It will return the same value as the unmodified tpTouchPin() to check the ratio of your untouched and touched states.
  
  TODO: The first call to the private method init() returns a too-small capacitance value (and it happens too fast)
  The work-around is to call init() twice.  The To Do item is to figure out why (is there some pre-existing
  charge on the pin?), and eliminate the extra call or document the reasoning.
 *********************************************************************************************************************/
-#define DEFAULT_MAX_FACTOR 1.5f
-#define NUM_SAMPLES 2
-
 #ifndef touchablePin_h
 #define touchablePin_h
+
+#define DEFAULT_TOUCHED_FACTOR 1.3f
 
 #include <stdio.h>
 #include <arduino.h>
@@ -46,30 +40,30 @@ class touchablePin {
 public:
     touchablePin(void);
     touchablePin(uint8_t pin);
-    touchablePin(uint8_t pin, float maxFactor);
-    touchablePin(uint8_t pin, float maxFactor, int numSamples);
+    touchablePin(uint8_t pin, float touchedFactor);
 
     void    initUntouched(void);
-    bool    isTouched(void);
-    int     touchRead(void);
+    bool    isTouched(void); // requires two immediately-consecutive positive tpTouchRead()'s
+    int     tpTouchRead(void);
+    int     touchReadTeensy(void) {   return(touchRead(pinNumber));    }
     void    setPin(uint8_t pin);
-    void    setMaxFactor(float factor) {_maxFactor = factor;};
+    void    setTouchedFactor(float factor) {_touchedFactor = factor;  init();  };
+    void    printPin(void);
     int     pinNumber       = -1;
     
-    float           untouchedValue;
-    float           lastTouchedValue;
-    
-    unsigned long   untouchedDuration;
-    unsigned long   targetTime;
-    unsigned long   startTouchTime;
-    unsigned long   endTouchTime;
+    unsigned long   untouchedValue      = 0,
+                    untouchedDuration   = 0,
+                    lastTouchedValue    = 0,
+                    lastTouchedDuration = 0,
+                    touchedTargetDuration = 0;
+    unsigned long   startTouchTime  = 0,
+                    endTouchTime    = 0;
 
 private:
+    bool    _isTouched = false;
     void    init(void);
-    int     touchReadWithMax(uint8_t, bool);
-    
-    int     _numSamples = NUM_SAMPLES; // give the touch routine this many time to sense touched.
-    float   _maxFactor = DEFAULT_MAX_FACTOR;
+    bool    initialized = false;
+    float   _touchedFactor = DEFAULT_TOUCHED_FACTOR;
 };
 
 #endif /* touchablePin_h */
