@@ -4,7 +4,7 @@
 *  Refactored 10/2020
 * based on Paul Stofregren's touchRead.c from ...
 * ------------------------------------------------------------------------
-* Teensyduino Core Library
+* Teensyduino Core Library 
 * http://www.pjrc.com/teensy/
 * Copyright (c) 2013 PJRC.COM, LLC.
 * ------------------------------------------------------------------------
