@@ -120,7 +120,7 @@ int touchablePin::tpTouchRead(void)
     } else {
         touchedTargetTime = startTouchTime + touchedTargetDuration;
         if (touchedTargetTime < startTouchTime) {
-            Serial.println("rollover in touchablePin::tpTouchRead() lastTouchedDuration and _isTouched will be unreliable");
+            Serial.printf("microsecond rollover in touchablePin::tpTouchRead() at %d mS.  STandard touchRead algorythm will apply.\n", millis());
         }
         while ((TSI0_GENCS & TSI_GENCS_SCNIP) && (micros() < touchedTargetTime))
             ;   // wait until fully charged (TSI0_GENCS & TSI_GENCS_SCNIP) or exceeding touchedTargetTime
@@ -135,13 +135,19 @@ int touchablePin::tpTouchRead(void)
 }
 
 void touchablePin::init(void) {
-    //    first call to tpTouchRead() returns too quickly TODO: find out why.
-    //    work-around - call it twice... second calling sets appropriate values
+    //    historically, the first call to tpTouchRead() returns too quickly, and hence I called it twice on object creation, until today
+    //    As of 10/6/20, it seems to get good readings from the first call.
+    //    Now I'll just recall in the case of a microsecond rollover, which should only happen on re-init() for resetting touchedFactor during later runtime.
     
     if (pinNumber != -1) {
-        tpTouchRead();
+//        tpTouchRead();
+//        firstUntouchedDuration = untouchedDuration;
         initialized = false;
-        tpTouchRead();
+        if (tpTouchRead() == -3) { // microsecond rollover during initialization
+            initialized = false;
+            tpTouchRead();
+        }
+//        Serial.printf("%02d) touchablePin init().\t1st: %d\t2nd: %d\n", pinNumber, firstUntouchedDuration, untouchedDuration);
     }
 }
 

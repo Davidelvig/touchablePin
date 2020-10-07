@@ -51,13 +51,14 @@ public:
     void    printPin(void);
     int     pinNumber       = -1;
     
-    unsigned long   untouchedValue      = 0,
-                    untouchedDuration   = 0,
-                    lastTouchedValue    = 0,
-                    lastTouchedDuration = 0,
-                    touchedTargetDuration = 0;
-    unsigned long   startTouchTime  = 0,
-                    endTouchTime    = 0;
+    unsigned long   firstUntouchedDuration  = 0,
+                    untouchedValue          = 0,
+                    untouchedDuration       = 0,
+                    lastTouchedValue        = 0,
+                    lastTouchedDuration     = 0,
+                    touchedTargetDuration   = 0;
+    unsigned long   startTouchTime          = 0,
+                    endTouchTime            = 0;
 
 private:
     bool    _isTouched = false;
