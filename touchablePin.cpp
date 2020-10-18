@@ -120,7 +120,8 @@ int touchablePin::tpTouchRead(void)
     } else {
         touchedTargetTime = startTouchTime + touchedTargetDuration;
         if (touchedTargetTime < startTouchTime) {
-            Serial.printf("microsecond rollover in touchablePin::tpTouchRead() at %d mS.  STandard touchRead algorythm will apply.\n", millis());
+            ;
+//            Serial.printf("uS rollover in touchablePin::tpTouchRead() at %d seconds.  Standard touchRead algorithm will apply.\n", millis()/1000);
         }
         while ((TSI0_GENCS & TSI_GENCS_SCNIP) && (micros() < touchedTargetTime))
             ;   // wait until fully charged (TSI0_GENCS & TSI_GENCS_SCNIP) or exceeding touchedTargetTime
